@@ -58,6 +58,24 @@ app.get('/api/contacts/:id', (request, response) => {
     }
 })
 
+app.delete('/api/contacts/:id', (request, response) => {
+    const id = request.params.id
+    contacts = contacts.filter(contact => contact.id !== id)
+
+    response.status(204).end()
+})
+
+const generateId = () => {
+    const maxId =  contacts.length > 0 
+                    ? Math.max(...contacts.map(n => Number(n.id)))
+                    : 0
+    return String(maxId + 1)
+}
+
+// app.post('api/contacts', (req, res) => {
+
+// })
+
 const PORT = 3001
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
