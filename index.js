@@ -1,5 +1,6 @@
 const express = require('express')
 const app = express()
+app.use(express.json())
 
 
 let contacts = [
@@ -67,14 +68,38 @@ app.delete('/api/contacts/:id', (request, response) => {
 
 const generateId = () => {
     const maxId =  contacts.length > 0 
-                    ? Math.max(...contacts.map(n => Number(n.id)))
-                    : 0
+        ? Math.max(...contacts.map(n => Number(n.id)))
+        : 0
     return String(maxId + 1)
 }
 
-// app.post('api/contacts', (req, res) => {
+app.post('/api/contacts', (request, response) => {
+    const body = request.body
+    const nameExists = contacts.some(c => c.name === body.name)
+    
+    if(!body.name || !body.number) {
+        return response.status(404).json({
+            error: 'Contact missing'       
+        })
+    }
 
-// })
+    if(nameExists){
+        return response.status(404).json({
+            error: 'Contact already exists'
+        })
+    }
+
+    const contact = {
+        name: body.name,
+        number: body.number,
+        id: generateId(),
+    }
+    console.log(contact)
+
+    contacts = contacts.concat(contact)
+
+    response.status(201).json(contact)
+})
 
 const PORT = 3001
 app.listen(PORT, () => {
