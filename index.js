@@ -1,10 +1,13 @@
 const express = require('express')
 const morgan = require('morgan')
 const app = express()
+const cors = require('cors')
 
 app.use(express.json())
 app.use(morgan('tiny'))
 app.use(morgan(':method :url :body'))
+app.use(cors())
+app.use(express.static('dist'))
 
 let contacts = [
     {
@@ -78,6 +81,7 @@ const generateId = () => {
 
 app.post('/api/contacts', (request, response) => {
     const body = request.body
+    console.log(body)
     const nameExists = contacts.some(c => c.name === body.name)
     
     if(!body.name || !body.number) {
@@ -108,7 +112,7 @@ morgan.token('body', req => {
     return JSON.stringify(req.body)
 })
 
-const PORT = 3001
+const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
