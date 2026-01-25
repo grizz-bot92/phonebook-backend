@@ -1,12 +1,11 @@
 const express = require('express')
 const morgan = require('morgan')
 const app = express()
-const cors = require('cors')
 
 app.use(express.json())
 app.use(morgan('tiny'))
 app.use(morgan(':method :url :body'))
-app.use(cors())
+
 app.use(express.static('dist'))
 
 let contacts = [

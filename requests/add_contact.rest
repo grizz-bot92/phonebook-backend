@@ -1,7 +1,7 @@
-POST http://localhost:3001/api/contacts
+POST https://phonebook-backend-muddy-glade-3100.fly.dev/api/contacts/
 Content-Type: application/json
 
 {
-    "name": "Brandon Thomas",
-    "number": "90290-066"
+    "name": "Bill Jeans",
+    "number": "90290-068886"
 }
