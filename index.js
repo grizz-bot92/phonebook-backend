@@ -1,5 +1,7 @@
+require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
+const Contact = require('./models/contact')
 const app = express()
 
 app.use(express.json())
@@ -49,7 +51,9 @@ app.get('/api/info', (request, response) => {
 )
 
 app.get('/api/contacts', (request, response) => {
-    response.json(contacts)
+    Contact.find({}).then(contacts => {
+        response.json(contacts)
+    })  
 })
 
 app.get('/api/contacts/:id', (request, response) => {
@@ -80,7 +84,7 @@ const generateId = () => {
 
 app.post('/api/contacts', (request, response) => {
     const body = request.body
-    console.log(body)
+
     const nameExists = contacts.some(c => c.name === body.name)
     
     if(!body.name || !body.number) {
@@ -95,16 +99,14 @@ app.post('/api/contacts', (request, response) => {
         })
     }
 
-    const contact = {
+    const contact = new Contact({
         name: body.name,
         number: body.number,
-        id: generateId(),
-    }
-    console.log(contact)
+    })
 
-    contacts = contacts.concat(contact)
-
-    response.status(201).json(contact)
+    contact.save().then(savedContact => {
+        response.json(savedContact)
+    })
 })
 
 morgan.token('body', req => {

@@ -5,11 +5,6 @@ if(process.argv.length < 3){
     process.exit(1)
 }
 
-const password = process.argv[2]
-
-const url = `mongodb+srv://bbenoit752_db_user:${password}@cluster0.xh2f2hy.mongodb.net/phoneBook?
-retryWrites=true&w=majority&appName=Cluster0`
-
 mongoose.set('strictQuery', false)
 mongoose.connect(url, { family: 4 } )
 
