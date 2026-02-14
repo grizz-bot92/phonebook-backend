@@ -10,6 +10,16 @@ app.use(morgan(':method :url :body'))
 
 app.use(express.static('dist'))
 
+const errorHandler = (err, req, res, next) =>{
+    console.log(err.message)
+
+    if(err.name === 'CastError'){
+        return res.status(400).send({ error: 'malformatted id'})
+    }
+
+    next(err)
+}
+
 let contacts = [
     {
         "id": "1",
@@ -51,28 +61,31 @@ app.get('/api/info', (request, response) => {
 )
 
 app.get('/api/contacts', (request, response) => {
-    Contact.find({}).then(contacts => {
-        response.json(contacts)
-    })  
+    Contact.find({})
+        .then(contacts => {
+            response.json(contacts)
+        })  
 })
 
-app.get('/api/contacts/:id', (request, response) => {
-    const id = request.params.id
-    const contact = contacts.find(contact => contact.id === id)
-
-    if(contact){
-        response.json(contact)
-    }else{
-        response.statusMessage = "No contact found for this entry!"
-        response.status(404).end()
-    }
+app.get('/api/contacts/:id', (request, response, next) => {
+    Contact.findById(request.params.id)
+        .then(contact =>{
+            if(contact){
+                response.json(contact)
+            } else {
+                response.statusMessage = "No contact found for this entry!"
+                response.status(404).end()
+            }
+        })
+        .catch(err => next(err))     
 })
 
-app.delete('/api/contacts/:id', (request, response) => {
-    const id = request.params.id
-    contacts = contacts.filter(contact => contact.id !== id)
-
-    response.status(204).end()
+app.delete('/api/contacts/:id', (req, res, next) => {
+    Contact.findByIdAndDelete(req.params.id)
+        .then(result => {
+            res.status(204).end()
+        })
+        .catch(error => next(error))
 })
 
 const generateId = () => {
@@ -109,9 +122,37 @@ app.post('/api/contacts', (request, response) => {
     })
 })
 
+app.put('/api/contacts/:id', (request, response, next) => {
+    console.log(request.body)
+    const { name, number } = request.body
+    
+
+    if(!name || !number){
+        return response.status(400).json({ error: 'request body missing name or number' })
+    }
+
+    Contact.findById(request.params.id)
+        .then(contact => {
+            if(!contact){
+                return response.status(404).end()
+            }
+        contact.name = name
+        contact.number = number
+
+        return contact.save()
+            .then((updatedContact) => {
+                response.json(updatedContact)
+            })
+        })
+        .catch(error => next(error))
+    })
+
 morgan.token('body', req => {
     return JSON.stringify(req.body)
 })
+
+
+app.use(errorHandler)
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {

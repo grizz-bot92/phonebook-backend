@@ -1,0 +1,14 @@
+PUT http://localhost:3001/api/contacts/698d2e3fb4329fe9b2319fc9
+Content-Type: application/json
+
+{
+    "name": "Billy Jeans", "number": "89000-9"
+}
+
+# PUT http://localhost:3001/api/contacts/698f3ee92a731a976808f7cf
+# Content-Type: application/json
+
+# {
+#   "name": "Brandon",
+#   "number": "789-009"
+# }

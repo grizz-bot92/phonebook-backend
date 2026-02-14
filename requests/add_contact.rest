@@ -1,4 +1,4 @@
-POST https://phonebook-backend-muddy-glade-3100.fly.dev/api/contacts/
+POST http://localhost:3001/api/contacts
 Content-Type: application/json
 
 {
