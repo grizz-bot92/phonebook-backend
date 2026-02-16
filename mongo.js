@@ -9,7 +9,11 @@ mongoose.set('strictQuery', false)
 mongoose.connect(url, { family: 4 } )
 
 const contactSchema = new mongoose.Schema({
-    contact: String,
+    name: {
+        type: String,
+        minLength: 3,
+        required: true
+    },
     number: String,
 })
 

@@ -10,14 +10,16 @@ app.use(morgan(':method :url :body'))
 
 app.use(express.static('dist'))
 
-const errorHandler = (err, req, res, next) =>{
-    console.log(err.message)
+const errorHandler = (error, req, res, next) =>{
+    console.log(error.message)
 
-    if(err.name === 'CastError'){
+    if(error.name === 'CastError'){
         return res.status(400).send({ error: 'malformatted id'})
+    }else if(error.name === 'ValidationError') {
+        return res.status(400).json({ error: error.message })
     }
 
-    next(err)
+    next(error)
 }
 
 let contacts = [
@@ -73,11 +75,10 @@ app.get('/api/contacts/:id', (request, response, next) => {
             if(contact){
                 response.json(contact)
             } else {
-                response.statusMessage = "No contact found for this entry!"
-                response.status(404).end()
+                response.status(404).json({ error: "No contact found for this entry!" })
             }
         })
-        .catch(err => next(err))     
+        .catch(error => next(error))     
 })
 
 app.delete('/api/contacts/:id', (req, res, next) => {
@@ -88,21 +89,14 @@ app.delete('/api/contacts/:id', (req, res, next) => {
         .catch(error => next(error))
 })
 
-const generateId = () => {
-    const maxId =  contacts.length > 0 
-        ? Math.max(...contacts.map(n => Number(n.id)))
-        : 0
-    return String(maxId + 1)
-}
-
-app.post('/api/contacts', (request, response) => {
+app.post('/api/contacts', (request, response, next) => {
     const body = request.body
 
     const nameExists = contacts.some(c => c.name === body.name)
     
     if(!body.name || !body.number) {
         return response.status(404).json({
-            error: 'Contact missing'       
+            error: 'Contact information missing'       
         })
     }
 
@@ -117,14 +111,16 @@ app.post('/api/contacts', (request, response) => {
         number: body.number,
     })
 
-    contact.save().then(savedContact => {
-        response.json(savedContact)
-    })
+    contact.save()
+        .then(savedContact => {
+            response.json(savedContact)
+        })
+        .catch(error => next(error))
 })
 
 app.put('/api/contacts/:id', (request, response, next) => {
     console.log(request.body)
-    const { name, number } = request.body
+    const { name, number } = request.body || {}
     
 
     if(!name || !number){
